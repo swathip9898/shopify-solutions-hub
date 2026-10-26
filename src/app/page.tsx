@@ -1,0 +1,421 @@
+'use client';
+
+import React, { useState, useEffect, useMemo } from 'react';
+import Header from '@/components/Header';
+import SolutionCard from '@/components/SolutionCard';
+import SolutionDetailModal from '@/components/SolutionDetailModal';
+import SubmitSolutionModal from '@/components/SubmitSolutionModal';
+import BrandsDirectory from '@/components/BrandsDirectory';
+import GoogleSheetGuideModal from '@/components/GoogleSheetGuideModal';
+import { Brand, Solution, SolutionCategory, SheetConfigStatus } from '@/types';
+import {
+  Search,
+  PlusCircle,
+  SlidersHorizontal,
+  X,
+  Store,
+  Layers,
+  Code2,
+  Sparkles,
+  RefreshCw,
+  Zap,
+} from 'lucide-react';
+
+const CATEGORIES: SolutionCategory[] = [
+  'Theme / Liquid',
+  'Checkout UI Extension',
+  'Shopify Functions',
+  'Custom App (Remix/Node)',
+  'Shopify Flow & Webhook',
+  'Metafields & Custom Data',
+  '3rd-Party Integration',
+  'Performance & CRO',
+];
+
+export default function Home() {
+  const [activeTab, setActiveTab] = useState<'solutions' | 'brands' | 'submit'>('solutions');
+  const [solutions, setSolutions] = useState<Solution[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [status, setStatus] = useState<SheetConfigStatus | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Filters & Search
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedBrand, setSelectedBrand] = useState<string>('All');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'title'>('newest');
+
+  // Modals
+  const [selectedSolution, setSelectedSolution] = useState<Solution | null>(null);
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
+
+  // Fetch initial data
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      const [resSol, resBrd, resStat] = await Promise.all([
+        fetch('/api/solutions'),
+        fetch('/api/brands'),
+        fetch('/api/status'),
+      ]);
+
+      const solData = await resSol.json();
+      const brdData = await resBrd.json();
+      const statData = await resStat.json();
+
+      if (solData.success) setSolutions(solData.data);
+      if (brdData.success) setBrands(brdData.data);
+      if (statData.success) setStatus(statData);
+    } catch (err) {
+      console.error('Failed to load portal data:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // Filter Solutions
+  const filteredSolutions = useMemo(() => {
+    return solutions
+      .filter((s) => {
+        const matchesCategory =
+          selectedCategory === 'All' || s.category === selectedCategory;
+
+        const matchesBrand =
+          selectedBrand === 'All' ||
+          s.brandName.toLowerCase() === selectedBrand.toLowerCase();
+
+        const q = searchQuery.toLowerCase().trim();
+        const matchesSearch =
+          !q ||
+          s.title.toLowerCase().includes(q) ||
+          s.brandName.toLowerCase().includes(q) ||
+          s.problem.toLowerCase().includes(q) ||
+          s.authorName.toLowerCase().includes(q) ||
+          s.themeUsed.toLowerCase().includes(q) ||
+          s.tags?.some((t) => t.toLowerCase().includes(q));
+
+        return matchesCategory && matchesBrand && matchesSearch;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'newest') {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        if (sortBy === 'oldest') {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        }
+        return a.title.localeCompare(b.title);
+      });
+  }, [solutions, searchQuery, selectedCategory, selectedBrand, sortBy]);
+
+  const handleBrandFilter = (brandName: string) => {
+    setSelectedBrand(brandName);
+    setActiveTab('solutions');
+  };
+
+  const handleSolutionAdded = (newSol: Solution) => {
+    setSolutions((prev) => [newSol, ...prev]);
+    // Also add to brands list if brand doesn't exist
+    if (!brands.some((b) => b.name.toLowerCase() === newSol.brandName.toLowerCase())) {
+      setBrands((prev) => [
+        {
+          id: `BRD-${String(Date.now()).slice(-4)}`,
+          name: newSol.brandName,
+          shopifyDomain: `${newSol.brandName.toLowerCase().replace(/\s+/g, '-')}.myshopify.com`,
+          theme: newSol.themeUsed || 'Dawn',
+          leadDeveloper: newSol.authorName,
+          status: 'Active',
+        },
+        ...prev,
+      ]);
+    }
+  };
+
+  const handleBrandAdded = (newBrand: Brand) => {
+    setBrands((prev) => [newBrand, ...prev]);
+  };
+
+  const hasActiveFilters =
+    searchQuery !== '' || selectedCategory !== 'All' || selectedBrand !== 'All';
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedCategory('All');
+    setSelectedBrand('All');
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans">
+      {/* Top Navigation */}
+      <Header
+        activeTab={activeTab}
+        setActiveTab={(tab) => {
+          if (tab === 'submit') {
+            setIsSubmitModalOpen(true);
+          } else {
+            setActiveTab(tab);
+          }
+        }}
+        status={status}
+        onOpenGuide={() => setIsGuideOpen(true)}
+        totalSolutions={solutions.length}
+        totalBrands={brands.length}
+      />
+
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Banner / Hero */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 p-6 sm:p-10 text-white shadow-xl border border-slate-800">
+          <div className="relative z-10 max-w-3xl space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Shopify Knowledge Base</span>
+            </div>
+            <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
+              Centralized Custom Solutions for 60+ Shopify Brands
+            </h1>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+              Don’t reinvent the wheel. Search and explore theme modifications, Checkout UI extensions, Shopify Functions, and custom apps built across all client stores.
+            </p>
+
+            {/* Quick Stats Ribbon */}
+            <div className="pt-4 flex flex-wrap items-center gap-4 text-xs sm:text-sm">
+              <div className="flex items-center gap-2 bg-slate-800/80 px-3.5 py-1.5 rounded-xl border border-slate-700/60">
+                <Store className="w-4 h-4 text-emerald-400" />
+                <span className="font-bold text-white">{brands.length}</span>
+                <span className="text-slate-300">Client Brands</span>
+              </div>
+              <div className="flex items-center gap-2 bg-slate-800/80 px-3.5 py-1.5 rounded-xl border border-slate-700/60">
+                <Layers className="w-4 h-4 text-teal-400" />
+                <span className="font-bold text-white">{solutions.length}</span>
+                <span className="text-slate-300">Custom Solutions Logged</span>
+              </div>
+              <div className="flex items-center gap-2 bg-slate-800/80 px-3.5 py-1.5 rounded-xl border border-slate-700/60">
+                <Zap className="w-4 h-4 text-amber-400" />
+                <span className="font-bold text-white">100%</span>
+                <span className="text-slate-300">Code Reusability</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Decorative background glow */}
+          <div className="absolute right-0 top-0 -mt-10 -mr-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        </div>
+
+        {/* View Switcher: Solutions vs Brands */}
+        {activeTab === 'brands' ? (
+          <BrandsDirectory
+            brands={brands}
+            solutions={solutions}
+            onSelectBrandForFilter={handleBrandFilter}
+            onBrandAdded={handleBrandAdded}
+          />
+        ) : (
+          <div className="space-y-6">
+            {/* Search, Filter & Sort Bar */}
+            <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+                {/* Search Input */}
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by solution name, brand, problem, tag, or developer..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Filter by Brand Dropdown */}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5 min-w-[180px]">
+                    <Store className="w-4 h-4 text-slate-400 shrink-0" />
+                    <select
+                      value={selectedBrand}
+                      onChange={(e) => setSelectedBrand(e.target.value)}
+                      className="w-full py-2.5 px-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+                    >
+                      <option value="All">All Brands ({brands.length})</option>
+                      {brands.map((b) => (
+                        <option key={b.id} value={b.name}>
+                          {b.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Sort By */}
+                  <div className="flex items-center gap-1.5 min-w-[150px]">
+                    <SlidersHorizontal className="w-4 h-4 text-slate-400 shrink-0" />
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'title')}
+                      className="w-full py-2.5 px-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+                    >
+                      <option value="newest">Newest First</option>
+                      <option value="oldest">Oldest First</option>
+                      <option value="title">Title (A-Z)</option>
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={() => setIsSubmitModalOpen(true)}
+                    className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 transition-colors shadow-sm shrink-0"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    <span>Log Solution</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Category Pills */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-2 no-scrollbar text-xs">
+                <button
+                  onClick={() => setSelectedCategory('All')}
+                  className={`px-3 py-1.5 rounded-xl font-medium shrink-0 transition-colors ${
+                    selectedCategory === 'All'
+                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  All Categories ({solutions.length})
+                </button>
+
+                {CATEGORIES.map((cat) => {
+                  const count = solutions.filter((s) => s.category === cat).length;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-3 py-1.5 rounded-xl font-medium shrink-0 transition-colors ${
+                        selectedCategory === cat
+                          ? 'bg-emerald-600 text-white shadow-sm'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      {cat} {count > 0 ? `(${count})` : ''}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Filter feedback & Clear button */}
+              {hasActiveFilters && (
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+                  <span className="text-slate-500">
+                    Showing <strong className="text-slate-900 dark:text-white">{filteredSolutions.length}</strong> of {solutions.length} solutions
+                    {selectedBrand !== 'All' && ` for ${selectedBrand}`}
+                    {selectedCategory !== 'All' && ` in ${selectedCategory}`}
+                  </span>
+                  <button
+                    onClick={clearFilters}
+                    className="text-emerald-600 dark:text-emerald-400 font-semibold hover:underline flex items-center gap-1"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    <span>Reset Filters</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Solutions Grid */}
+            {isLoading ? (
+              <div className="text-center py-24 space-y-3">
+                <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p className="text-sm text-slate-500">Loading custom solutions catalog...</p>
+              </div>
+            ) : filteredSolutions.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredSolutions.map((solution) => (
+                  <SolutionCard
+                    key={solution.id}
+                    solution={solution}
+                    onSelect={(sol) => setSelectedSolution(sol)}
+                    onFilterBrand={handleBrandFilter}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 space-y-4">
+                <Code2 className="w-12 h-12 text-slate-400 mx-auto" />
+                <div className="space-y-1">
+                  <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
+                    No matching custom solutions found
+                  </h3>
+                  <p className="text-xs text-slate-500 max-w-md mx-auto">
+                    Try adjusting your search keywords, clearing filters, or be the first to log this solution for your team!
+                  </p>
+                </div>
+                <div className="flex items-center justify-center gap-3 pt-2">
+                  <button
+                    onClick={clearFilters}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
+                  >
+                    Clear Filters
+                  </button>
+                  <button
+                    onClick={() => setIsSubmitModalOpen(true)}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500"
+                  >
+                    + Log New Solution
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900/50">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div>
+            Shopify Custom Solutions Hub • Centralized Team Repository
+          </div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsGuideOpen(true)}
+              className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium"
+            >
+              Google Sheets Setup Guide
+            </button>
+            <span>•</span>
+            <span className="font-mono text-[11px] text-slate-400">Ready for Vercel Free Hosting</span>
+          </div>
+        </div>
+      </footer>
+
+      {/* Modals */}
+      <SolutionDetailModal
+        solution={selectedSolution}
+        onClose={() => setSelectedSolution(null)}
+        onFilterBrand={handleBrandFilter}
+      />
+
+      <SubmitSolutionModal
+        brands={brands}
+        isOpen={isSubmitModalOpen}
+        onClose={() => setIsSubmitModalOpen(false)}
+        onSolutionAdded={handleSolutionAdded}
+      />
+
+      <GoogleSheetGuideModal
+        isOpen={isGuideOpen}
+        onClose={() => setIsGuideOpen(false)}
+        status={status}
+      />
+    </div>
+  );
+}
