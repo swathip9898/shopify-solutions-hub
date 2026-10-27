@@ -352,19 +352,25 @@ export default function Home() {
                 <Code2 className="w-12 h-12 text-slate-400 mx-auto" />
                 <div className="space-y-1">
                   <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
-                    No matching custom solutions found
+                    {solutions.length === 0
+                      ? 'No custom solutions logged yet'
+                      : 'No matching custom solutions found'}
                   </h3>
                   <p className="text-xs text-slate-500 max-w-md mx-auto">
-                    Try adjusting your search keywords, clearing filters, or be the first to log this solution for your team!
+                    {solutions.length === 0
+                      ? 'Your database is fresh and ready. Click "+ Log Solution" to save your first custom Shopify feature!'
+                      : 'Try adjusting your search keywords, clearing filters, or log this custom solution for your team.'}
                   </p>
                 </div>
                 <div className="flex items-center justify-center gap-3 pt-2">
-                  <button
-                    onClick={clearFilters}
-                    className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
-                  >
-                    Clear Filters
-                  </button>
+                  {solutions.length > 0 && (
+                    <button
+                      onClick={clearFilters}
+                      className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
+                    >
+                      Clear Filters
+                    </button>
+                  )}
                   <button
                     onClick={() => setIsSubmitModalOpen(true)}
                     className="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500"

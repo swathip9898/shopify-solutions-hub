@@ -241,12 +241,25 @@ export default function BrandsDirectory({
       </div>
 
       {filteredBrands.length === 0 && (
-        <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-          <Store className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-            No brands matched &quot;{searchTerm}&quot;
-          </h3>
-          <p className="text-xs text-slate-400 mt-1">Try another search term or add a new brand.</p>
+        <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+          <Store className="w-10 h-10 text-slate-400 mx-auto" />
+          <div>
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              {searchTerm ? `No brands matched "${searchTerm}"` : 'No brands added yet'}
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">
+              {searchTerm ? 'Try another search keyword.' : 'Click "+ Add Brand" to register your first Shopify store.'}
+            </p>
+          </div>
+          {!searchTerm && (
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 transition-colors shadow-sm"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>+ Add First Brand</span>
+            </button>
+          )}
         </div>
       )}
 

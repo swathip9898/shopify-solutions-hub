@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Brand, Solution, SolutionCategory, SolutionDifficulty } from '@/types';
 import {
   X,
@@ -49,8 +49,16 @@ export default function SubmitSolutionModal({
   onSolutionAdded,
 }: SubmitSolutionModalProps) {
   const [brandName, setBrandName] = useState(brands[0]?.name || '');
-  const [isCustomBrand, setIsCustomBrand] = useState(false);
+  const [isCustomBrand, setIsCustomBrand] = useState(brands.length === 0);
   const [customBrandName, setCustomBrandName] = useState('');
+
+  useEffect(() => {
+    if (brands.length === 0) {
+      setIsCustomBrand(true);
+    } else if (!brandName && brands[0]?.name) {
+      setBrandName(brands[0].name);
+    }
+  }, [brands, brandName]);
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<SolutionCategory>('Theme / Liquid');
   const [themeUsed, setThemeUsed] = useState('Dawn (v14.0)');
