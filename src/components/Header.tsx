@@ -1,14 +1,13 @@
 'use client';
 
 import React from 'react';
-import { Layers, Database, PlusCircle, Store, HelpCircle } from 'lucide-react';
+import { Layers, Database, PlusCircle, Store } from 'lucide-react';
 import { SheetConfigStatus } from '@/types';
 
 interface HeaderProps {
   activeTab: 'solutions' | 'brands' | 'submit';
   setActiveTab: (tab: 'solutions' | 'brands' | 'submit') => void;
   status: SheetConfigStatus | null;
-  onOpenGuide: () => void;
   totalSolutions: number;
   totalBrands: number;
 }
@@ -17,7 +16,6 @@ export default function Header({
   activeTab,
   setActiveTab,
   status,
-  onOpenGuide,
   totalSolutions,
   totalBrands,
 }: HeaderProps) {
@@ -80,30 +78,27 @@ export default function Header({
             </button>
           </nav>
 
-          {/* Database Status & Help */}
+          {/* Database Status */}
           <div className="flex items-center space-x-3">
-            {status?.isConfigured ? (
-              <button
-                onClick={onOpenGuide}
-                className="flex items-center space-x-2 bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 px-3 py-1 rounded-lg text-xs font-medium hover:bg-emerald-900/50 transition-colors"
-                title="Google Sheets connected"
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span className="hidden sm:inline">Google Sheet Connected</span>
-                <Database className="w-3.5 h-3.5 ml-1 text-emerald-400" />
-              </button>
-            ) : (
-              <button
-                onClick={onOpenGuide}
-                className="flex items-center space-x-2 bg-amber-950/60 border border-amber-500/40 text-amber-300 px-3 py-1 rounded-lg text-xs font-medium hover:bg-amber-900/50 transition-colors"
-                title="Click to view instructions for connecting your Google Sheet"
-              >
-                <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-                <span className="hidden sm:inline">Local Demo Mode</span>
-                <span className="text-[10px] underline ml-1">Connect Sheet</span>
-                <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
-              </button>
-            )}
+            <div
+              className={`flex items-center space-x-2 px-3 py-1 rounded-lg text-xs font-medium border ${
+                status?.isConfigured
+                  ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300'
+                  : 'bg-slate-800 border-slate-700 text-slate-400'
+              }`}
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  status?.isConfigured
+                    ? 'bg-emerald-400 animate-pulse'
+                    : 'bg-slate-500'
+                }`}
+              ></span>
+              <span className="hidden sm:inline">
+                {status?.isConfigured ? 'Google Sheet Connected' : 'Database Ready'}
+              </span>
+              <Database className="w-3.5 h-3.5 ml-1 text-emerald-400" />
+            </div>
 
             <button
               onClick={() => setActiveTab('submit')}

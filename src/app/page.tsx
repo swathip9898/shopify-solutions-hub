@@ -6,7 +6,6 @@ import SolutionCard from '@/components/SolutionCard';
 import SolutionDetailModal from '@/components/SolutionDetailModal';
 import SubmitSolutionModal from '@/components/SubmitSolutionModal';
 import BrandsDirectory from '@/components/BrandsDirectory';
-import GoogleSheetGuideModal from '@/components/GoogleSheetGuideModal';
 import { Brand, Solution, SolutionCategory, SheetConfigStatus } from '@/types';
 import {
   Search,
@@ -48,7 +47,6 @@ export default function Home() {
   // Modals
   const [selectedSolution, setSelectedSolution] = useState<Solution | null>(null);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
-  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   // Fetch initial data
   const loadData = async () => {
@@ -161,7 +159,6 @@ export default function Home() {
           }
         }}
         status={status}
-        onOpenGuide={() => setIsGuideOpen(true)}
         totalSolutions={solutions.length}
         totalBrands={brands.length}
       />
@@ -391,13 +388,6 @@ export default function Home() {
             Shopify Custom Solutions Hub • Centralized Team Repository
           </div>
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsGuideOpen(true)}
-              className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium"
-            >
-              Google Sheets Setup Guide
-            </button>
-            <span>•</span>
             <span className="font-mono text-[11px] text-slate-400">Ready for Vercel Free Hosting</span>
           </div>
         </div>
@@ -415,12 +405,6 @@ export default function Home() {
         isOpen={isSubmitModalOpen}
         onClose={() => setIsSubmitModalOpen(false)}
         onSolutionAdded={handleSolutionAdded}
-      />
-
-      <GoogleSheetGuideModal
-        isOpen={isGuideOpen}
-        onClose={() => setIsGuideOpen(false)}
-        status={status}
       />
     </div>
   );
