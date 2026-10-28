@@ -383,12 +383,9 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-neutral-200 dark:border-neutral-800 py-6 text-center text-xs text-neutral-500 bg-white dark:bg-black">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-center">
           <div>
             Shopify Custom Solutions Hub • Centralized Team Repository
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="font-mono text-[11px] text-neutral-400">Ready for Vercel Free Hosting</span>
           </div>
         </div>
       </footer>
