@@ -18,12 +18,25 @@ export type SolutionCategory =
   | 'Shopify Flow & Webhook'
   | 'Metafields & Custom Data'
   | '3rd-Party Integration'
-  | 'Performance & CRO';
+  | 'Performance & CRO'
+  | 'QA & Automation';
 
 export type SolutionDifficulty =
   | 'Quick (< 2 hrs)'
   | 'Medium (1-2 days)'
   | 'Complex (1+ week)';
+
+export interface ContributorStats {
+  name: string;
+  email?: string;
+  solutionsCount: number;
+  rank: number;
+  badge: string;
+  topCategory: string;
+  brandsHelpedCount: number;
+  brandsHelped: string[];
+  recentSolutionDate: string;
+}
 
 export interface Solution {
   id: string;

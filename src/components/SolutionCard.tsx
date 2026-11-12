@@ -10,39 +10,40 @@ import {
   Calendar,
   User,
   ChevronRight,
+  Crown,
 } from 'lucide-react';
 
 interface SolutionCardProps {
   solution: Solution;
   onSelect: (solution: Solution) => void;
   onFilterBrand?: (brandName: string) => void;
+  onFilterAuthor?: (authorName: string) => void;
+  authorRank?: number;
 }
 
 export function getCategoryBadgeColor(category: SolutionCategory): string {
   // Sophisticated monochrome palette with clear contrast
   switch (category) {
     case 'Theme / Liquid':
-      return 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700';
     case 'Checkout UI Extension':
-      return 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700';
     case 'Shopify Functions':
-      return 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700';
     case 'Custom App (Remix/Node)':
-      return 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700';
     case 'Shopify Flow & Webhook':
-      return 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700';
     case 'Metafields & Custom Data':
-      return 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700';
     case '3rd-Party Integration':
-      return 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700';
     case 'Performance & CRO':
-      return 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700';
     default:
-      return 'bg-neutral-100 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-300 border-neutral-300 dark:border-neutral-700';
+      return 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700';
   }
 }
 
-export default function SolutionCard({ solution, onSelect, onFilterBrand }: SolutionCardProps) {
+export default function SolutionCard({
+  solution,
+  onSelect,
+  onFilterBrand,
+  onFilterAuthor,
+  authorRank,
+}: SolutionCardProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopyCode = (e: React.MouseEvent) => {
@@ -152,13 +153,45 @@ export default function SolutionCard({ solution, onSelect, onFilterBrand }: Solu
 
       {/* Card Footer: Author & Action */}
       <div className="pt-3 border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1" title="Author">
-            <User className="w-3.5 h-3.5 text-neutral-400" />
-            <span className="font-medium text-neutral-800 dark:text-neutral-200">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onFilterAuthor?.(solution.authorName);
+            }}
+            className="flex items-center gap-1.5 hover:text-neutral-900 dark:hover:text-white transition-colors group/author"
+            title={`Filter solutions by ${solution.authorName}`}
+          >
+            <User className="w-3.5 h-3.5 text-neutral-400 group-hover/author:text-neutral-900 dark:group-hover/author:text-white" />
+            <span className="font-medium text-neutral-800 dark:text-neutral-200 group-hover/author:underline">
               {solution.authorName}
             </span>
-          </span>
+            {authorRank === 1 && (
+              <span
+                className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-sm"
+                title="#1 Top Contributor"
+              >
+                <Crown className="w-2.5 h-2.5" />
+                <span>#1</span>
+              </span>
+            )}
+            {authorRank === 2 && (
+              <span
+                className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200"
+                title="#2 Contributor"
+              >
+                🥈 #2
+              </span>
+            )}
+            {authorRank === 3 && (
+              <span
+                className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-neutral-700"
+                title="#3 Contributor"
+              >
+                🥉 #3
+              </span>
+            )}
+          </button>
           <span className="flex items-center gap-1 text-[11px] text-neutral-400">
             <Calendar className="w-3 h-3" />
             <span>{solution.createdAt}</span>

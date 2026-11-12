@@ -17,6 +17,7 @@ import {
   Tag,
   Clock,
   Sparkles,
+  Crown,
 } from 'lucide-react';
 import { getCategoryBadgeColor } from './SolutionCard';
 
@@ -24,12 +25,18 @@ interface SolutionDetailModalProps {
   solution: Solution | null;
   onClose: () => void;
   onFilterBrand?: (brandName: string) => void;
+  onFilterAuthor?: (authorName: string) => void;
+  authorRank?: number;
+  authorBadge?: string;
 }
 
 export default function SolutionDetailModal({
   solution,
   onClose,
   onFilterBrand,
+  onFilterAuthor,
+  authorRank,
+  authorBadge,
 }: SolutionDetailModalProps) {
   const [copied, setCopied] = useState(false);
 
@@ -117,8 +124,43 @@ export default function SolutionDetailModal({
               <User className="w-4 h-4 text-neutral-500" />
               <div>
                 <div className="text-neutral-400">Created by</div>
-                <div className="font-semibold text-neutral-900 dark:text-neutral-200">
-                  {solution.authorName} {solution.authorEmail ? `(${solution.authorEmail})` : ''}
+                <div className="font-semibold text-neutral-900 dark:text-neutral-200 flex items-center gap-2 flex-wrap">
+                  <span>
+                    {solution.authorName} {solution.authorEmail ? `(${solution.authorEmail})` : ''}
+                  </span>
+                  {authorRank === 1 && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-black text-white dark:bg-white dark:text-black shadow-sm">
+                      <Crown className="w-2.5 h-2.5" />
+                      <span>#1 Top Contributor</span>
+                    </span>
+                  )}
+                  {authorRank === 2 && (
+                    <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200">
+                      🥈 #2 Contributor
+                    </span>
+                  )}
+                  {authorRank === 3 && (
+                    <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-neutral-700">
+                      🥉 #3 Contributor
+                    </span>
+                  )}
+                  {authorBadge && authorRank && authorRank > 3 && (
+                    <span className="inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-800">
+                      {authorBadge}
+                    </span>
+                  )}
+                  {onFilterAuthor && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onFilterAuthor(solution.authorName);
+                        onClose();
+                      }}
+                      className="text-[11px] text-neutral-500 hover:text-neutral-900 dark:hover:text-white underline ml-1"
+                    >
+                      Filter solutions
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

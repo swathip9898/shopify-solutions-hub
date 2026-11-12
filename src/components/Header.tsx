@@ -1,15 +1,16 @@
 'use client';
 
 import React from 'react';
-import { Layers, Database, PlusCircle, Store } from 'lucide-react';
+import { Layers, Database, PlusCircle, Store, Trophy } from 'lucide-react';
 import { SheetConfigStatus } from '@/types';
 
 interface HeaderProps {
-  activeTab: 'solutions' | 'brands' | 'submit';
-  setActiveTab: (tab: 'solutions' | 'brands' | 'submit') => void;
+  activeTab: 'solutions' | 'brands' | 'leaderboard' | 'submit';
+  setActiveTab: (tab: 'solutions' | 'brands' | 'leaderboard' | 'submit') => void;
   status: SheetConfigStatus | null;
   totalSolutions: number;
   totalBrands: number;
+  totalContributors?: number;
 }
 
 export default function Header({
@@ -18,6 +19,7 @@ export default function Header({
   status,
   totalSolutions,
   totalBrands,
+  totalContributors = 0,
 }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 bg-black border-b border-neutral-800 text-white shadow-sm">
@@ -63,6 +65,18 @@ export default function Header({
             >
               <Store className="w-3.5 h-3.5" />
               <span>Brands Directory ({totalBrands})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('leaderboard')}
+              className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeTab === 'leaderboard'
+                  ? 'bg-white text-black shadow-sm'
+                  : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
+              }`}
+            >
+              <Trophy className="w-3.5 h-3.5" />
+              <span>Leaderboard {totalContributors > 0 ? `(${totalContributors})` : ''}</span>
             </button>
 
             <button
@@ -113,21 +127,27 @@ export default function Header({
         <div className="flex md:hidden items-center justify-around py-2 border-t border-neutral-800 text-xs">
           <button
             onClick={() => setActiveTab('solutions')}
-            className={`px-3 py-1 rounded-lg ${activeTab === 'solutions' ? 'bg-white text-black font-bold' : 'text-neutral-400'}`}
+            className={`px-2.5 py-1 rounded-lg ${activeTab === 'solutions' ? 'bg-white text-black font-bold' : 'text-neutral-400'}`}
           >
             Solutions ({totalSolutions})
           </button>
           <button
             onClick={() => setActiveTab('brands')}
-            className={`px-3 py-1 rounded-lg ${activeTab === 'brands' ? 'bg-white text-black font-bold' : 'text-neutral-400'}`}
+            className={`px-2.5 py-1 rounded-lg ${activeTab === 'brands' ? 'bg-white text-black font-bold' : 'text-neutral-400'}`}
           >
             Brands ({totalBrands})
           </button>
           <button
-            onClick={() => setActiveTab('submit')}
-            className={`px-3 py-1 rounded-lg ${activeTab === 'submit' ? 'bg-white text-black font-bold' : 'text-neutral-300'}`}
+            onClick={() => setActiveTab('leaderboard')}
+            className={`px-2.5 py-1 rounded-lg ${activeTab === 'leaderboard' ? 'bg-white text-black font-bold' : 'text-neutral-400'}`}
           >
-            + Add New
+            🏆 Leaderboard
+          </button>
+          <button
+            onClick={() => setActiveTab('submit')}
+            className={`px-2.5 py-1 rounded-lg ${activeTab === 'submit' ? 'bg-white text-black font-bold' : 'text-neutral-300'}`}
+          >
+            + Add
           </button>
         </div>
       </div>

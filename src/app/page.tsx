@@ -6,6 +6,8 @@ import SolutionCard from '@/components/SolutionCard';
 import SolutionDetailModal from '@/components/SolutionDetailModal';
 import SubmitSolutionModal from '@/components/SubmitSolutionModal';
 import BrandsDirectory from '@/components/BrandsDirectory';
+import Leaderboard from '@/components/Leaderboard';
+import { getContributorRankings } from '@/lib/contributors';
 import { Brand, Solution, SolutionCategory, SheetConfigStatus } from '@/types';
 import {
   Search,
@@ -18,6 +20,10 @@ import {
   Sparkles,
   RefreshCw,
   Zap,
+  Trophy,
+  User,
+  Crown,
+  ArrowRight,
 } from 'lucide-react';
 
 const CATEGORIES: SolutionCategory[] = [
@@ -29,10 +35,11 @@ const CATEGORIES: SolutionCategory[] = [
   'Metafields & Custom Data',
   '3rd-Party Integration',
   'Performance & CRO',
+  'QA & Automation',
 ];
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'solutions' | 'brands' | 'submit'>('solutions');
+  const [activeTab, setActiveTab] = useState<'solutions' | 'brands' | 'leaderboard' | 'submit'>('solutions');
   const [solutions, setSolutions] = useState<Solution[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [status, setStatus] = useState<SheetConfigStatus | null>(null);
@@ -42,6 +49,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedBrand, setSelectedBrand] = useState<string>('All');
+  const [selectedAuthor, setSelectedAuthor] = useState<string>('All');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'title'>('newest');
 
   // Modals
@@ -76,6 +84,22 @@ export default function Home() {
     loadData();
   }, []);
 
+  // Compute Contributor Rankings
+  const contributors = useMemo(() => getContributorRankings(solutions), [solutions]);
+  const topContributor = contributors[0] || null;
+
+  // Build lookup maps for rank and badge by author name (case-insensitive)
+  const { rankMap, badgeMap } = useMemo(() => {
+    const rMap: Record<string, number> = {};
+    const bMap: Record<string, string> = {};
+    contributors.forEach((c) => {
+      const key = c.name.toLowerCase();
+      rMap[key] = c.rank;
+      bMap[key] = c.badge;
+    });
+    return { rankMap: rMap, badgeMap: bMap };
+  }, [contributors]);
+
   // Filter Solutions
   const filteredSolutions = useMemo(() => {
     return solutions
@@ -87,6 +111,10 @@ export default function Home() {
           selectedBrand === 'All' ||
           s.brandName.toLowerCase() === selectedBrand.toLowerCase();
 
+        const matchesAuthor =
+          selectedAuthor === 'All' ||
+          s.authorName.toLowerCase() === selectedAuthor.toLowerCase();
+
         const q = searchQuery.toLowerCase().trim();
         const matchesSearch =
           !q ||
@@ -97,7 +125,7 @@ export default function Home() {
           s.themeUsed.toLowerCase().includes(q) ||
           s.tags?.some((t) => t.toLowerCase().includes(q));
 
-        return matchesCategory && matchesBrand && matchesSearch;
+        return matchesCategory && matchesBrand && matchesAuthor && matchesSearch;
       })
       .sort((a, b) => {
         if (sortBy === 'newest') {
@@ -108,10 +136,15 @@ export default function Home() {
         }
         return a.title.localeCompare(b.title);
       });
-  }, [solutions, searchQuery, selectedCategory, selectedBrand, sortBy]);
+  }, [solutions, searchQuery, selectedCategory, selectedBrand, selectedAuthor, sortBy]);
 
   const handleBrandFilter = (brandName: string) => {
     setSelectedBrand(brandName);
+    setActiveTab('solutions');
+  };
+
+  const handleAuthorFilter = (authorName: string) => {
+    setSelectedAuthor(authorName);
     setActiveTab('solutions');
   };
 
@@ -138,12 +171,16 @@ export default function Home() {
   };
 
   const hasActiveFilters =
-    searchQuery !== '' || selectedCategory !== 'All' || selectedBrand !== 'All';
+    searchQuery !== '' ||
+    selectedCategory !== 'All' ||
+    selectedBrand !== 'All' ||
+    selectedAuthor !== 'All';
 
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedCategory('All');
     setSelectedBrand('All');
+    setSelectedAuthor('All');
   };
 
   return (
@@ -161,6 +198,7 @@ export default function Home() {
         status={status}
         totalSolutions={solutions.length}
         totalBrands={brands.length}
+        totalContributors={contributors.length}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -191,24 +229,79 @@ export default function Home() {
                 <span className="text-neutral-400">Custom Solutions Logged</span>
               </div>
               <div className="flex items-center gap-2 bg-neutral-900 px-3.5 py-1.5 rounded-xl border border-neutral-800">
+                <User className="w-4 h-4 text-neutral-300" />
+                <span className="font-bold text-white">{contributors.length}</span>
+                <span className="text-neutral-400">Contributors</span>
+              </div>
+              <div className="flex items-center gap-2 bg-neutral-900 px-3.5 py-1.5 rounded-xl border border-neutral-800">
                 <Zap className="w-4 h-4 text-neutral-300" />
                 <span className="font-bold text-white">100%</span>
                 <span className="text-neutral-400">Code Reusability</span>
               </div>
             </div>
+
+            {/* Top Contributor Recognition Ribbon */}
+            {topContributor && (
+              <div className="mt-5 pt-4 border-t border-neutral-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-white text-black flex items-center justify-center font-bold shadow-md shrink-0">
+                    <Trophy className="w-5 h-5 text-black" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400 font-semibold">
+                        #1 Top Contributor Spotlight
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-black">
+                        {topContributor.badge}
+                      </span>
+                    </div>
+                    <div className="text-sm font-bold text-white flex items-center gap-2 mt-0.5">
+                      <span>{topContributor.name}</span>
+                      <span className="text-xs font-normal text-neutral-400">
+                        • {topContributor.solutionsCount} {topContributor.solutionsCount === 1 ? 'solution' : 'solutions'} logged across {topContributor.brandsHelpedCount} {topContributor.brandsHelpedCount === 1 ? 'brand' : 'brands'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => handleAuthorFilter(topContributor.name)}
+                    className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-700 transition-colors"
+                  >
+                    View Solutions
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('leaderboard')}
+                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-black hover:bg-neutral-200 transition-colors flex items-center gap-1.5 shadow-sm"
+                  >
+                    <Trophy className="w-3.5 h-3.5" />
+                    <span>View Leaderboard</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Decorative subtle ambient background */}
           <div className="absolute right-0 top-0 -mt-10 -mr-10 w-96 h-96 bg-neutral-800/30 rounded-full blur-3xl pointer-events-none"></div>
         </div>
 
-        {/* View Switcher: Solutions vs Brands */}
+        {/* View Switcher: Solutions vs Brands vs Leaderboard */}
         {activeTab === 'brands' ? (
           <BrandsDirectory
             brands={brands}
             solutions={solutions}
             onSelectBrandForFilter={handleBrandFilter}
             onBrandAdded={handleBrandAdded}
+          />
+        ) : activeTab === 'leaderboard' ? (
+          <Leaderboard
+            contributors={contributors}
+            totalSolutions={solutions.length}
+            onSelectContributor={handleAuthorFilter}
+            onOpenSubmitModal={() => setIsSubmitModalOpen(true)}
           />
         ) : (
           <div className="space-y-6">
@@ -235,9 +328,10 @@ export default function Home() {
                   )}
                 </div>
 
-                {/* Filter by Brand Dropdown */}
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1.5 min-w-[180px]">
+                {/* Filters Group */}
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Filter by Brand Dropdown */}
+                  <div className="flex items-center gap-1.5 min-w-[160px]">
                     <Store className="w-4 h-4 text-neutral-400 shrink-0" />
                     <select
                       value={selectedBrand}
@@ -253,8 +347,26 @@ export default function Home() {
                     </select>
                   </div>
 
+                  {/* Filter by Contributor Dropdown */}
+                  <div className="flex items-center gap-1.5 min-w-[170px]">
+                    <User className="w-4 h-4 text-neutral-400 shrink-0" />
+                    <select
+                      value={selectedAuthor}
+                      onChange={(e) => setSelectedAuthor(e.target.value)}
+                      className="w-full py-2.5 px-3 text-xs rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 font-medium"
+                    >
+                      <option value="All">All Contributors ({contributors.length})</option>
+                      {contributors.map((c) => (
+                        <option key={c.name} value={c.name}>
+                          {c.rank === 1 ? '🥇 ' : c.rank === 2 ? '🥈 ' : c.rank === 3 ? '🥉 ' : ''}
+                          {c.name} ({c.solutionsCount})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
                   {/* Sort By */}
-                  <div className="flex items-center gap-1.5 min-w-[150px]">
+                  <div className="flex items-center gap-1.5 min-w-[140px]">
                     <SlidersHorizontal className="w-4 h-4 text-neutral-400 shrink-0" />
                     <select
                       value={sortBy}
@@ -315,6 +427,11 @@ export default function Home() {
                     Showing <strong className="text-neutral-900 dark:text-white">{filteredSolutions.length}</strong> of {solutions.length} solutions
                     {selectedBrand !== 'All' && ` for ${selectedBrand}`}
                     {selectedCategory !== 'All' && ` in ${selectedCategory}`}
+                    {selectedAuthor !== 'All' && (
+                      <span>
+                        {' '}by <strong className="text-neutral-900 dark:text-white">{selectedAuthor}</strong>
+                      </span>
+                    )}
                   </span>
                   <button
                     onClick={clearFilters}
@@ -341,6 +458,8 @@ export default function Home() {
                     solution={solution}
                     onSelect={(sol) => setSelectedSolution(sol)}
                     onFilterBrand={handleBrandFilter}
+                    onFilterAuthor={handleAuthorFilter}
+                    authorRank={rankMap[solution.authorName.toLowerCase()]}
                   />
                 ))}
               </div>
@@ -355,7 +474,7 @@ export default function Home() {
                   </h3>
                   <p className="text-xs text-neutral-500 max-w-md mx-auto">
                     {solutions.length === 0
-                      ? 'Your database is fresh and ready. Click "+ Log Solution" to save your first custom Shopify feature!'
+                      ? 'Your database is fresh and ready. Click "+ Log Solution" to save your first custom Shopify feature and take the #1 spot on the leaderboard!'
                       : 'Try adjusting your search keywords, clearing filters, or log this custom solution for your team.'}
                   </p>
                 </div>
@@ -395,6 +514,9 @@ export default function Home() {
         solution={selectedSolution}
         onClose={() => setSelectedSolution(null)}
         onFilterBrand={handleBrandFilter}
+        onFilterAuthor={handleAuthorFilter}
+        authorRank={selectedSolution ? rankMap[selectedSolution.authorName.toLowerCase()] : undefined}
+        authorBadge={selectedSolution ? badgeMap[selectedSolution.authorName.toLowerCase()] : undefined}
       />
 
       <SubmitSolutionModal
