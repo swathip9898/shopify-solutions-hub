@@ -136,6 +136,15 @@ Instead of requiring complex Google Cloud Service Account JSON keys or OAuth ref
 - Shows total solution count per brand.
 - Clicking a brand filters the solution feed directly to solutions authored for that brand.
 
+### 5. Contributor Hall of Fame & Leaderboard (Competitive Gamification)
+- **#1 Top Contributor Spotlight**: The engineer with the highest number of logged solutions is celebrated on the homepage banner with their custom badge, total solutions count, and stores impacted.
+- **Champions Podium (Top 3)**:
+  - 🥇 **#1 MVP Champion**: Features a dedicated high-contrast crown spotlight card with full store reach and code domain metrics.
+  - 🥈 **#2 Runner-Up**: Silver podium card with "Master Builder" title.
+  - 🥉 **#3 Third Place**: Bronze podium card with "Lead Innovator" title.
+- **Ranked Leaderboard Table**: Searchable directory of all developers, listing solution volumes, primary tech domain (e.g. Liquid, Functions, Checkout Extension), and brands empowered.
+- **Dynamic Card & Modal Badging**: Solution cards and detail modals showcase contributor ranking badges (`👑 #1`, `🥈 #2`, `🥉 #3`) and allow 1-click filtering by author.
+
 ---
 
 ## 6. Deployment & Environment Configuration
