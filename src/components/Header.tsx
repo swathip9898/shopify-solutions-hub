@@ -22,33 +22,38 @@ export default function Header({
   totalContributors = 0,
 }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 bg-black border-b border-neutral-800 text-white shadow-sm">
+    <header className="sticky top-0 z-30 bg-[#FFFFFF] border-b border-[#E3EDF7] text-[#25364A] shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo & Brand */}
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('solutions')}>
-            <div className="w-9 h-9 rounded-xl bg-white text-black flex items-center justify-center shadow-md">
+          <div
+            className="flex items-center space-x-3 cursor-pointer select-none"
+            onClick={() => setActiveTab('solutions')}
+          >
+            <div className="w-10 h-10 rounded-xl bg-[#318CE7] text-white flex items-center justify-center shadow-md shadow-[#318CE7]/20">
               <Layers className="w-5 h-5 font-bold" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-bold text-base tracking-tight text-white">Shopify Hub</span>
-                <span className="text-[10px] font-mono uppercase tracking-wider bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded-full border border-neutral-700">
+                <span className="font-extrabold text-lg tracking-tight text-[#25364A]">
+                  Shopify Hub
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-[#EAF5FF] text-[#318CE7] px-2 py-0.5 rounded-full border border-[#E3EDF7]">
                   Team Portal
                 </span>
               </div>
-              <p className="text-xs text-neutral-400">Custom Solutions Repository</p>
+              <p className="text-xs text-[#25364A]/60">Custom Solutions Repository</p>
             </div>
           </div>
 
           {/* Navigation Tabs */}
-          <nav className="hidden md:flex items-center space-x-1 bg-neutral-900/90 p-1 rounded-xl border border-neutral-800">
+          <nav className="hidden md:flex items-center space-x-1.5 bg-[#EAF5FF] p-1.5 rounded-2xl border border-[#E3EDF7]">
             <button
               onClick={() => setActiveTab('solutions')}
-              className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 activeTab === 'solutions'
-                  ? 'bg-white text-black shadow-sm'
-                  : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
+                  ? 'bg-[#318CE7] text-white shadow-sm'
+                  : 'text-[#25364A]/70 hover:text-[#25364A] hover:bg-[#FFFFFF]'
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
@@ -57,10 +62,10 @@ export default function Header({
 
             <button
               onClick={() => setActiveTab('brands')}
-              className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 activeTab === 'brands'
-                  ? 'bg-white text-black shadow-sm'
-                  : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
+                  ? 'bg-[#318CE7] text-white shadow-sm'
+                  : 'text-[#25364A]/70 hover:text-[#25364A] hover:bg-[#FFFFFF]'
               }`}
             >
               <Store className="w-3.5 h-3.5" />
@@ -69,85 +74,76 @@ export default function Header({
 
             <button
               onClick={() => setActiveTab('leaderboard')}
-              className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 activeTab === 'leaderboard'
-                  ? 'bg-white text-black shadow-sm'
-                  : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
+                  ? 'bg-[#318CE7] text-white shadow-sm'
+                  : 'text-[#25364A]/70 hover:text-[#25364A] hover:bg-[#FFFFFF]'
               }`}
             >
               <Trophy className="w-3.5 h-3.5" />
               <span>Leaderboard {totalContributors > 0 ? `(${totalContributors})` : ''}</span>
             </button>
-
-            <button
-              onClick={() => setActiveTab('submit')}
-              className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                activeTab === 'submit'
-                  ? 'bg-white text-black shadow-sm'
-                  : 'text-neutral-300 hover:text-white hover:bg-neutral-800'
-              }`}
-            >
-              <PlusCircle className="w-3.5 h-3.5" />
-              <span>+ Add Solution</span>
-            </button>
           </nav>
 
-          {/* Database Status */}
+          {/* Database Status & Primary Action */}
           <div className="flex items-center space-x-3">
             <div
-              className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-medium border ${
+              className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-semibold border ${
                 status?.isConfigured
-                  ? 'bg-neutral-900 border-neutral-700 text-neutral-200'
-                  : 'bg-neutral-900 border-neutral-800 text-neutral-500'
+                  ? 'bg-[#EAF5FF] border-[#E3EDF7] text-[#25364A]'
+                  : 'bg-neutral-100 border-neutral-300 text-neutral-500'
               }`}
             >
               <span
                 className={`w-2 h-2 rounded-full ${
                   status?.isConfigured
-                    ? 'bg-white animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.8)]'
-                    : 'bg-neutral-600'
+                    ? 'bg-[#318CE7] animate-pulse shadow-[0_0_8px_rgba(49,140,231,0.6)]'
+                    : 'bg-neutral-400'
                 }`}
               ></span>
               <span className="hidden sm:inline">
-                {status?.isConfigured ? 'Google Sheet Connected' : 'Database Ready'}
+                {status?.isConfigured ? 'Sheet Connected' : 'Database Ready'}
               </span>
-              <Database className="w-3.5 h-3.5 ml-1 text-neutral-400" />
+              <Database className="w-3.5 h-3.5 text-[#318CE7]" />
             </div>
 
+            {/* Primary Action Button (#318CE7 / Hover #2478CC) */}
             <button
               onClick={() => setActiveTab('submit')}
-              className="md:hidden flex items-center justify-center p-2 rounded-xl bg-white text-black hover:bg-neutral-200 transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#318CE7] text-white hover:bg-[#2478CC] transition-all shadow-md shadow-[#318CE7]/20 hover:shadow-[#318CE7]/30"
             >
               <PlusCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">+ Log Solution</span>
+              <span className="sm:hidden">Add</span>
             </button>
           </div>
         </div>
 
         {/* Mobile Navigation bar */}
-        <div className="flex md:hidden items-center justify-around py-2 border-t border-neutral-800 text-xs">
+        <div className="flex md:hidden items-center justify-around py-2.5 border-t border-[#E3EDF7] text-xs">
           <button
             onClick={() => setActiveTab('solutions')}
-            className={`px-2.5 py-1 rounded-lg ${activeTab === 'solutions' ? 'bg-white text-black font-bold' : 'text-neutral-400'}`}
+            className={`px-3 py-1 rounded-lg font-bold ${
+              activeTab === 'solutions' ? 'bg-[#318CE7] text-white' : 'text-[#25364A]/70'
+            }`}
           >
             Solutions ({totalSolutions})
           </button>
           <button
             onClick={() => setActiveTab('brands')}
-            className={`px-2.5 py-1 rounded-lg ${activeTab === 'brands' ? 'bg-white text-black font-bold' : 'text-neutral-400'}`}
+            className={`px-3 py-1 rounded-lg font-bold ${
+              activeTab === 'brands' ? 'bg-[#318CE7] text-white' : 'text-[#25364A]/70'
+            }`}
           >
             Brands ({totalBrands})
           </button>
           <button
             onClick={() => setActiveTab('leaderboard')}
-            className={`px-2.5 py-1 rounded-lg ${activeTab === 'leaderboard' ? 'bg-white text-black font-bold' : 'text-neutral-400'}`}
+            className={`px-3 py-1 rounded-lg font-bold ${
+              activeTab === 'leaderboard' ? 'bg-[#318CE7] text-white' : 'text-[#25364A]/70'
+            }`}
           >
             🏆 Leaderboard
-          </button>
-          <button
-            onClick={() => setActiveTab('submit')}
-            className={`px-2.5 py-1 rounded-lg ${activeTab === 'submit' ? 'bg-white text-black font-bold' : 'text-neutral-300'}`}
-          >
-            + Add
           </button>
         </div>
       </div>
