@@ -45,6 +45,19 @@ export default function Home() {
   const [status, setStatus] = useState<SheetConfigStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Sync tab with URL query parameter (?tab=leaderboard | ?tab=brands)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam === 'brands' || tabParam === 'leaderboard') {
+        setActiveTab(tabParam);
+      } else if (tabParam === 'submit') {
+        setIsSubmitModalOpen(true);
+      }
+    }
+  }, []);
+
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
